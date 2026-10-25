@@ -1,0 +1,17 @@
+name: Transcode cover video
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  transcode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download source video
+        run: curl -L --fail -o source.MOV 'https://github.com/Yewenbo123/qiongkuoaha-horse-riding/releases/download/v1.0-video/dji_fly_20250726_142236_0048_1760259244400_video_trim.MOV'
+      - name: Convert to web video
+        run: ffmpeg -y -i source.MOV -vf "scale='min(1280,iw)':-2" -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -movflags +faststart -an cover-video.mp4
+      - name: Upload converted video to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload v1.0-video cover-video.mp4 --clobber --repo "$GITHUB_REPOSITORY"
